@@ -8,6 +8,9 @@ const app = express();
 
 //--------------------------
 const userRoute = require('./routes/UserRoute');
+const customerRoute = require('./routes/CustomerRoute');
+const orderRoute = require('./routes/OrderRoute');
+const productRoute = require('./routes/ProductRoute');
 //--------------------------
 
 // parse application/x-www-form-urlencoded
@@ -33,3 +36,6 @@ app.get("/test-api", (req, resp) => {
 
 //-----------
 app.use('/api/v1/users',userRoute);
+app.use('/api/v1/orders',orderRoute);
+app.use('/api/v1/products',productRoute);
+app.use('/api/v1/customers',customerRoute);
