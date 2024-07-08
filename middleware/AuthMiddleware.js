@@ -14,3 +14,5 @@
         next();
     })
  }
+
+ module.exports = verifyToken;
