@@ -15,17 +15,19 @@ const create = (req, resp) => {
       return resp.status(500).json(error);
     });
 };
+
 const findById = (req, resp) => {
-  customerSchema.findOne({'_id': req.params.id }).then((selectedObj) => {
+  customerSchema.findOne({ _id: req.params.id }).then((selectedObj) => {
     if (selectedObj != null) {
-      return resp.status(200).json({ data: selectedObj });
+      return resp.status(200).json(selectedObj);
     }
     return resp.status(404).json({ message: "Customer not found!" });
   });
 };
+
 const update = async (req, resp) => {
   const updateData = await customerSchema.findByIdAndUpdate(
-    { '_id': req.params.id },
+    { _id: req.params.id },
     {
       $set: {
         fullName: req.body.fullName,
@@ -43,34 +45,49 @@ const update = async (req, resp) => {
   }
 };
 const deleteById = async (req, resp) => {
-    const deleteData = await customerSchema.findByIdAndDelete(
-        { '_id': req.params.id });
-    
-      if (deleteData) {
-        return resp.status(200).json({ message: "deleted" });
-      } else {
-        return resp.status(500).json({ message: "Internal server error!" });
-      }
+  const deleteData = await customerSchema.findByIdAndDelete({
+    _id: req.params.id,
+  });
+
+  if (deleteData) {
+    return resp.status(200).json({ message: "deleted" });
+  } else {
+    return resp.status(500).json({ message: "Internal server error!" });
+  }
 };
-const findAll = (req, resp) => {
-    try {
-        const {searchText, page=1, size=10} = req.query;
+const findAll = async (req, resp) => {
+  try {
+    const { searchText, page = 1, size = 10 } = req.query;
 
-        const pageNumber = parseInt(page);
-        const pageSize = parseInt(size);
+    const pageNumber = parseInt(page, 10);
+    const pageSize = parseInt(size, 10);
 
-        const query = {};
-        if(searchText){
-            query.$text = {$search:searchText}
-        }
-
-        const skip = (pageNumber-1) * pageSize;
-
-        const data = customerSchema.find(query).limit(pageSize).skip(skip);
-        return resp.status(200).json(data);
-    } catch (error) {
-        return resp.status(500).json({ message: "Internal server error!" });
+    const query = {};
+    if (searchText) {
+      query.fullName = { $regex: searchText, $options: 'i' }; // Case-insensitive search
     }
+
+    const skip = (pageNumber - 1) * pageSize;
+
+    const customers = await customerSchema.find(query)
+      .limit(pageSize)
+      .skip(skip);
+
+    return resp.status(200).json(customers);
+  } catch (error) {
+    console.error(error);
+    return resp.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const findByName = async (req, res) => {
+  try {
+      const { name } = req.query;
+      const customers = await customerSchema.find({ fullName: new RegExp(name, 'i') }); // Using a regex for case-insensitive matching
+      res.status(200).json(customers);
+  } catch (error) {
+      res.status(500).json({ error: error.message });
+  }
 };
 
 module.exports = {
@@ -78,5 +95,6 @@ module.exports = {
   findById,
   update,
   deleteById,
-  findAll
+  findAll,
+  findByName
 };
