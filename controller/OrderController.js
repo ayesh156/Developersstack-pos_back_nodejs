@@ -10,7 +10,7 @@ const create = (req, resp) => {
   order
     .save()
     .then((response) => {
-      resp.status(201).json({ message: "Product saved!" });
+      resp.status(201).json({ message: "Order saved!" });
     })
     .catch((error) => {
       return resp.status(500).json(error);
@@ -54,7 +54,7 @@ const deleteById = async (req, resp) => {
         return resp.status(500).json({ message: "Internal server error!" });
       }
 };
-const findAll = (req, resp) => {
+const findAll = async (req, resp) => {
     try {
         const {searchText, page=1, size=10} = req.query;
 
@@ -68,11 +68,46 @@ const findAll = (req, resp) => {
 
         const skip = (pageNumber-1) * pageSize;
 
-        const data = orderSchema.find(query).limit(pageSize).skip(skip);
-        return resp.status(200).json(data);
+        await orderSchema.find(query).limit(pageSize).skip(skip).then(data=>{
+          return resp.status(200).json(data);
+        });
     } catch (error) {
         return resp.status(500).json({ message: "Internal server error!" });
     }
+};
+
+const findCount =  (req, resp) => {
+  try {
+
+    orderSchema.countDocuments().then(data=>{
+        return resp.status(200).json(data);
+      });
+
+  } catch (error) {
+    return resp.status(500).json({ message: "Internal server error" });
+  }
+  
+};
+
+const findIncome = async  (req, resp) => {
+  try {
+
+    const result = await orderSchema.aggregate([
+      {
+        $group:{
+          _id:null,
+          totalCostSum:{$sum:'totalCost'}
+        }
+      }
+    ]);
+
+    const totalCostSum = result.length>0?result[0].totalCostSum:0;
+    resp.json(totalCostSum);
+
+  } catch (error) {
+    return resp.status(500).json({ message: "Internal server error" });
+  }
+  
 };
 
 module.exports = {
@@ -80,5 +115,7 @@ module.exports = {
   findById,
   update,
   deleteById,
-  findAll
+  findAll,
+  findCount,
+  findIncome
 };

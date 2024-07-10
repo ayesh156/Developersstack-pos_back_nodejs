@@ -90,11 +90,26 @@ const findByName = async (req, res) => {
   }
 };
 
+const findCount =  (req, resp) => {
+  try {
+
+    customerSchema.countDocuments().then(data=>{
+        return resp.status(200).json(data);
+      });
+
+  } catch (error) {
+    return resp.status(500).json({ message: "Internal server error" });
+  }
+  
+};
+
+
 module.exports = {
   create,
   findById,
   update,
   deleteById,
   findAll,
-  findByName
+  findByName,
+  findCount
 };
