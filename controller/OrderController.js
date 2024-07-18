@@ -17,7 +17,7 @@ const create = (req, resp) => {
     });
 };
 const findById = (req, resp) => {
-  orderSchema.findOne({ '_id': req.params.id }).then((selectedObj) => {
+  orderSchema.findOne({ _id: req.params.id }).then((selectedObj) => {
     if (selectedObj != null) {
       return resp.status(200).json({ data: selectedObj });
     }
@@ -26,7 +26,7 @@ const findById = (req, resp) => {
 };
 const update = async (req, resp) => {
   const updateData = await orderSchema.findByIdAndUpdate(
-    { '_id': req.params.id },
+    { _id: req.params.id },
     {
       $set: {
         date: req.body.date,
@@ -45,69 +45,67 @@ const update = async (req, resp) => {
   }
 };
 const deleteById = async (req, resp) => {
-    const deleteData = await orderSchema.findByIdAndDelete(
-        { '_id': req.params.id });
-    
-      if (deleteData) {
-        return resp.status(200).json({ message: "deleted" });
-      } else {
-        return resp.status(500).json({ message: "Internal server error!" });
-      }
+  const deleteData = await orderSchema.findByIdAndDelete({
+    _id: req.params.id,
+  });
+
+  if (deleteData) {
+    return resp.status(200).json({ message: "deleted" });
+  } else {
+    return resp.status(500).json({ message: "Internal server error!" });
+  }
 };
 const findAll = async (req, resp) => {
-    try {
-        const {searchText, page=1, size=10} = req.query;
-
-        const pageNumber = parseInt(page);
-        const pageSize = parseInt(size);
-
-        const query = {};
-        if(searchText){
-            query.$text = {$search:searchText}
-        }
-
-        const skip = (pageNumber-1) * pageSize;
-
-        await orderSchema.find(query).limit(pageSize).skip(skip).then(data=>{
-          return resp.status(200).json(data);
-        });
-    } catch (error) {
-        return resp.status(500).json({ message: "Internal server error!" });
-    }
-};
-
-const findCount =  (req, resp) => {
   try {
+    const { searchText, page = 1, size = 10 } = req.query;
 
-    orderSchema.countDocuments().then(data=>{
+    const pageNumber = parseInt(page);
+    const pageSize = parseInt(size);
+
+    const query = {};
+    if (searchText) {
+      query.$text = { $search: searchText };
+    }
+
+    const skip = (pageNumber - 1) * pageSize;
+
+    await orderSchema
+      .find(query)
+      .limit(pageSize)
+      .skip(skip)
+      .then((data) => {
         return resp.status(200).json(data);
       });
-
   } catch (error) {
-    return resp.status(500).json({ message: "Internal server error" });
+    return resp.status(500).json({ message: "Internal server error!" });
   }
-  
 };
 
-const findIncome = async  (req, resp) => {
+const findCount = (req, resp) => {
   try {
-
-    const result = await orderSchema.aggregate([
-      {
-        $group:{
-          _id:null,
-          totalCostSum:{$sum:'totalCost'}
-        }
-      }
-    ]);
-
-    const totalCostSum = result.length>0?result[0].totalCostSum:0;
-    resp.json(totalCostSum);
-
+    orderSchema.countDocuments().then((data) => {
+      return resp.status(200).json(data);
+    });
   } catch (error) {
     return resp.status(500).json({ message: "Internal server error" });
   }
-  
+};
+
+const findIncome = async (req, resp) => {
+  try {
+    const result = await orderSchema.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalCostSum: { $sum: "$totalCost" },
+        },
+      },
+    ]);
+    const totalCostSum = result.length > 0 ? result[0].totalCostSum : 0;
+    resp.json(totalCostSum );
+  } catch (error) {
+    return resp.status(500).json({ message: "internal server error" });
+  }
 };
 
 module.exports = {
@@ -117,5 +115,5 @@ module.exports = {
   deleteById,
   findAll,
   findCount,
-  findIncome
+  findIncome,
 };

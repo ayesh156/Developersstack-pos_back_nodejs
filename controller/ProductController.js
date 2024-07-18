@@ -83,15 +83,14 @@ const findAll = async (req, resp) => {
 };
 
 const findAllMin =  (req, resp) => {
-  try {
-
+  try{
     productSchema.find({qtyOnHand:{$lt:10}}).then(data=>{
         return resp.status(200).json(data);
-      });
+    })
 
-  } catch (error) {
-    return resp.status(500).json({ message: "Internal server error" });
-  }
+}catch (error){
+    return resp.status(500).json({'message':'internal server error'});
+}
   
 };
 

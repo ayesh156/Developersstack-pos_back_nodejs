@@ -16,7 +16,7 @@ const register = (req,resp) => {
                     fullName:req.body.fullName,
                     password:hash,
                     email:req.body.email,
-                    activeState:req.body.activeState,
+                    activeState:true,
                 });
         
                 const transporter = nodemailer.createTransport({
