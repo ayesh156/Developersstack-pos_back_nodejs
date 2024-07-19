@@ -73,7 +73,7 @@ const login = (req,resp) => {
                 const expiresIn = '24h';
 
                 const token = jsonwebtoken.sign(payload,secretKey,{expiresIn});
-                return resp.status(200).json({'token':token});
+                return resp.status(200).json(token);
                 
             }else{
                 return resp.status(401).json({'message':'Password is incorrect!'});
